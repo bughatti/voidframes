@@ -1,6 +1,6 @@
 # VoidFrames — party/raid frames with click casting
 
-**Status:** v1.0.0, first public release 2026-10-28. Built 2026-10-22 from scratch on Blizzard APIs: written from scratch, never copied from or marketed against another addon.
+**Status:** v1.0.0, first public release 2026-10-28. CurseForge project **1770185** (file 9349928, awaiting moderation), public mirror `bughatti/voidframes`, Discord #voidframes (intro pinned). Built 2026-10-22 from scratch on Blizzard APIs: written from scratch, never copied from or marketed against another addon.
 
 - Auras: Blizzard `CustomAuraContainer` (Blizzard_AuraContainer). HoTs `HELPFUL|PLAYER` (max 120s), debuffs `HARMFUL|RAID_IN_COMBAT`, cleanse slot `HARMFUL|RAID` (= what YOU can dispel), group buffs `HELPFUL` + spell-ID whitelist. Style/anchor inside `initializeFrame` (frames lock after init). Precreated out of combat (`PrepareAuraBoxes`).
 - Clicks: Blizzard's Click Casting runs first and blocks `target`/`menu` on clicks without its interaction binding, so "target" is a `/target <unit>` macro. Defaults per spec (`SPEC_DEFAULTS`) else per class; `OLD_DEFAULTS` for upgrades.
