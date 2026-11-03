@@ -2,10 +2,11 @@
 ## Title: VoidFrames
 ## Notes: Clean party and raid frames with click casting built in: bind spells, target, focus and menu to any mouse button and modifier, per character and spec.
 ## Author: VoidUI
-## Version: 1.0.0
+## Version: 1.0.1
 ## SavedVariables: VoidFramesDB
 ## IconTexture: Interface\Icons\Spell_Holy_PrayerOfHealing02
 
+CharSettings.lua
 Core.lua
 Frames.lua
 BindingsEditor.lua

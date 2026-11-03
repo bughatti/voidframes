@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.1] — 2026-11-02
+
+### Changed
+- **Settings are per character.** Each character keeps its own VoidFrames settings, and a new character starts with the settings of the one you played last, so nothing resets when you update. If you also run a Void addon with the hub icon by your minimap (VoidBags, VoidAH, VoidGather, ...), right-click it and pick **Copy settings from...** to take another character's settings. Frame positions stay shared; click bindings were already per character and spec.
+
 ## [1.0.0] — 2026-10-28
 
 First public release.

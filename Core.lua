@@ -25,6 +25,14 @@ VF.DEFAULTS = {
     hideBlizzard = true, -- park Blizzard's party/raid frames out of sight
 }
 
+-- Every setting above is per character (CharSettings.lua); frame positions
+-- stay shared. Click bindings are already kept per character and spec.
+do
+    local keys = {}
+    for k in pairs(VF.DEFAULTS) do keys[#keys + 1] = k end
+    VF.CharSettings.Register(ADDON, "VoidFramesDB", keys)
+end
+
 -- Mouse buttons and modifiers the bindings editor offers.
 VF.BUTTONS = {
     { id = "1", label = "Left" }, { id = "2", label = "Right" }, { id = "3", label = "Middle" },

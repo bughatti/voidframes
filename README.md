@@ -94,6 +94,7 @@ A spell you haven't learned or talented simply does nothing when clicked; bind s
 
 ## Good to Know
 
+- **Settings are per character.** Each character keeps its own VoidFrames settings, and a new character starts with the settings of the one you played last, so nothing resets when you update. If you also run a Void addon with the hub icon by your minimap (VoidBags, VoidAH, VoidGather, ...), right-click it and pick **Copy settings from...** to take another character's settings. Frame positions stay shared; click bindings were already per character and spec.
 - **Blizzard's own Click Casting comes first.** A spell or macro bound in the game's Click Casting (Esc → Options → Click Casting) on the same click wins over VoidFrames; clear it there to use VoidFrames for that click. The player menu only opens on a plain right-click (the game's rule), so healers, whose right-click cleanses, open it from the player's portrait instead.
 - **Bindings, layout and size only change out of combat.** A change made mid-fight is applied as soon as combat ends.
 - **Midnight hides group members' auras from addons during instance fights.** VoidFrames hands that work to Blizzard's own aura display, so HoTs, debuffs, the cleanse button and group buffs keep showing in Mythic+ and raids. The "missing your buff" check reads auras directly, so it only runs out of combat.
