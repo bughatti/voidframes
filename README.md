@@ -100,7 +100,7 @@ A spell you haven't learned or talented simply does nothing when clicked; bind s
 - **Midnight hides group members' auras from addons during instance fights.** VoidFrames hands that work to Blizzard's own aura display, so HoTs, debuffs, the cleanse button and group buffs keep showing in Mythic+ and raids. The "missing your buff" check reads auras directly, so it only runs out of combat.
 - **The cleanse button is always clickable.** With nothing to remove, the click just fails without using your cooldown.
 - **Raid frames have no cleanse square** (they sit side by side); right-click the frame instead if your spec's default does it, or bind your cleanse to a click.
-- Bindings are saved per character and spec; layout and look are saved account-wide.
+- Bindings are saved per character and spec; layout and look per character.
 
 ---
 
