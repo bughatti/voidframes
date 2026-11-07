@@ -23,6 +23,7 @@ VF.DEFAULTS = {
     showGroupBuffs = true,  -- row of long group buffs (Mark of the Wild, ...) above each frame
     rangeFade   = true,
     hideBlizzard = true, -- park Blizzard's party/raid frames out of sight
+    showPower   = true,  -- mana / rage / energy bar under each frame's health
 }
 
 -- Every setting above is per character (CharSettings.lua); frame positions
@@ -282,6 +283,8 @@ local function BuildOptions()
         "Long group buffs (Mark of the Wild, Arcane Intellect, Fortitude, Battle Shout, Skyfury, Blessing of the Bronze) in a small row above each player. Frames get a little more space between them for it.")
     Check("showMissingBuff", "Show who is missing your group buff",
         "Your class's group buff (Mark of the Wild, Arcane Intellect, Power Word: Fortitude, Battle Shout) shows on players who don't have it. Out of combat only.")
+    Check("showPower", "Show mana, rage and energy",
+        "A thin bar under each player's health in their power's color: mana, rage, energy, focus, runic power. Applies out of combat.")
     Check("rangeFade", "Fade out-of-range frames", "Frames dim when the player is out of range.")
     Check("hideBlizzard", "Hide Blizzard party and raid frames",
         "Hides Blizzard's own group frames so only VoidFrames shows. Turning this off brings them back after a /reload.")

@@ -79,6 +79,18 @@ local function CreateUnitButton(name, parent, unit)
     bg:SetAllPoints(); bg:SetColorTexture(0.08, 0.08, 0.1, 0.95)
     b.hp, b.hpTex, b.hpBg = hp, hp:GetStatusBarTexture(), bg
 
+    -- Power (mana / rage / energy ...): a thin bar along the bottom; the health bar
+    -- ends above it (ScaleButton sets both). The user, 2026-11-06: "voidframes doesnt
+    -- show players mana, rage".
+    local pp = CreateFrame("StatusBar", nil, vis)
+    pp:SetStatusBarTexture(BAR)
+    local pbg = pp:CreateTexture(nil, "BACKGROUND")
+    pbg:SetAllPoints(); pbg:SetColorTexture(0.05, 0.05, 0.07, 0.95)
+    pp:SetPoint("BOTTOMLEFT", 1, 1)
+    pp:SetPoint("BOTTOMRIGHT", -1, 1)
+    pp:SetHeight(4)
+    b.pp, b.ppTex = pp, pp:GetStatusBarTexture()
+
     b.edge = Edge(vis, 0, 0, 0, 1, 1)
     b.targetEdge = Edge(vis, 1, 1, 1, 1, 2)
     b.dispelEdge = Edge(vis, 0.75, 0.3, 1, 1, 2)
@@ -150,6 +162,54 @@ end
 local function UpdateHealth(b)
     b.hp:SetMinMaxValues(0, UnitHealthMax(b.unit))
     b.hp:SetValue(UnitHealth(b.unit))
+end
+
+-- Power values can be secret too: they only go into SetMinMaxValues / SetValue.
+-- Every class / spec / form: the bar shows the unit's CURRENT main power, in the game's
+-- own color for it (PowerBarColor): mana, rage, energy, focus, runic power, astral
+-- power, maelstrom, insanity, fury, pain. A druid changing form fires UNIT_DISPLAYPOWER
+-- and the bar switches (cat = energy, bear = rage, caster = mana). Mana is drawn a
+-- brighter blue: the game's pure 0,0,1 vanishes on a dark, see-through frame.
+local MANA = { r = 0.25, g = 0.55, b = 1.0 }
+-- Our own copy for clients where Blizzard's PowerBarColor table isn't loaded (it's
+-- flagged "mainline" only in Blizzard_UnitFrame.toc): every main power a player can have.
+local OWN_COLORS = {
+    MANA = MANA, RAGE = { r = 1, g = 0, b = 0 }, FOCUS = { r = 1, g = 0.5, b = 0.25 },
+    ENERGY = { r = 1, g = 1, b = 0 }, RUNIC_POWER = { r = 0, g = 0.82, b = 1 },
+    LUNAR_POWER = { r = 0.3, g = 0.52, b = 0.9 }, MAELSTROM = { r = 0, g = 0.5, b = 1 },
+    INSANITY = { r = 0.4, g = 0, b = 0.8 }, FURY = { r = 0.788, g = 0.259, b = 0.992 },
+    PAIN = { r = 1, g = 0.61, b = 0 },
+    [0] = MANA, [1] = { r = 1, g = 0, b = 0 }, [2] = { r = 1, g = 0.5, b = 0.25 }, [3] = { r = 1, g = 1, b = 0 },
+    [6] = { r = 0, g = 0.82, b = 1 }, [8] = { r = 0.3, g = 0.52, b = 0.9 }, [11] = { r = 0, g = 0.5, b = 1 },
+    [13] = { r = 0.4, g = 0, b = 0.8 }, [17] = { r = 0.788, g = 0.259, b = 0.992 }, [18] = { r = 1, g = 0.61, b = 0 },
+}
+local function PowerColor(key)
+    if key == nil or sec(key) then return nil end
+    if key == "MANA" or key == 0 then return MANA end
+    local t = _G.PowerBarColor
+    return (t and t[key]) or OWN_COLORS[key]
+end
+-- Bottom of the frame: the power bar along the edge, the health bar fills the rest.
+local function LayoutBars(b)
+    local ph = b._ph or 0
+    b.pp:ClearAllPoints()
+    b.pp:SetPoint("BOTTOMLEFT", 1, 1); b.pp:SetPoint("BOTTOMRIGHT", -1, 1)
+    b.pp:SetHeight(math.max(1, ph)); b.pp:SetShown(ph > 0)
+    b.hp:ClearAllPoints()
+    b.hp:SetPoint("TOPLEFT", 1, -1)
+    b.hp:SetPoint("BOTTOMRIGHT", -1, 1 + (ph > 0 and ph + 1 or 0))
+end
+
+-- One bar: the power of the form they're in right now, switching as they shift (the
+-- user, 2026-11-06: "just current form, it should be switchable based on their form").
+local function UpdatePower(b)
+    if not b._ph or b._ph == 0 then return end
+    local unit = b.unit
+    local ptype, token = UnitPowerType(unit)
+    local c = PowerColor(token) or PowerColor(ptype) or MANA
+    b.ppTex:SetVertexColor(c.r, c.g, c.b)
+    b.pp:SetMinMaxValues(0, UnitPowerMax(unit))
+    b.pp:SetValue(UnitPower(unit))
 end
 
 -- The top-right corner holds the role icon and, out of combat, the "missing your group
@@ -480,7 +540,7 @@ end
 
 function VF:UpdateButton(b)
     if not UnitExists(b.unit) then return end
-    UpdateHealth(b); UpdateColorAndName(b); UpdateTarget(b)
+    UpdateHealth(b); UpdatePower(b); UpdateColorAndName(b); UpdateTarget(b)
     UpdateRaidMark(b); UpdateAuras(b); UpdateRange(b)
     -- roster shuffles put a new player on this unit token: let the containers re-read
     if b.hotBox then pcall(b.hotBox.UpdateAllAuras, b.hotBox) end
@@ -629,6 +689,9 @@ end
 -- Text, icons and markers follow the frame size so a small frame stays readable.
 local function ScaleButton(b, f)
     local function px(v) return math.max(6, math.floor(v * f + 0.5)) end
+    -- power bar(s) under the health bar (or none: health fills the frame)
+    b._ph = VF:Get("showPower") ~= false and math.max(3, math.floor(5 * f + 0.5)) or 0
+    LayoutBars(b)
     b.name:SetFont(FONT, math.max(8, px(11)), "OUTLINE")
     b._pad = px(4)
     b.status:SetFont(FONT, math.max(8, px(10)), "OUTLINE")
@@ -726,6 +789,7 @@ local rangeTick, buffTick = 0, 0
 
 local UNIT_EVENTS = {
     UNIT_HEALTH = UpdateHealth, UNIT_MAXHEALTH = UpdateHealth,
+    UNIT_POWER_UPDATE = UpdatePower, UNIT_MAXPOWER = UpdatePower, UNIT_DISPLAYPOWER = UpdatePower,
     UNIT_AURA = UpdateAuras, UNIT_NAME_UPDATE = UpdateColorAndName,
     UNIT_CONNECTION = UpdateColorAndName, UNIT_FLAGS = UpdateColorAndName,
 }

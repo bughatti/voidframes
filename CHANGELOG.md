@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0] — 2026-11-06
+
+### Added
+- **Mana, rage, energy and more on every frame.** A thin bar under each player's health shows their resource in its own color: mana, rage, energy, focus, runic power, astral power, maelstrom, insanity, fury, pain. It follows the form they're in: a druid's bar switches between mana, energy and rage as they shift. Turn it off in settings ("Show mana, rage and energy").
+- **WoW Forever** support.
+
 ## [1.0.1] — 2026-11-02
 
 ### Changed

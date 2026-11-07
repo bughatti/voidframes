@@ -21,6 +21,7 @@ VoidFrames replaces Blizzard's party and raid frames with flat, readable boxes y
 - **Cleanse button** — a square to the right of each party frame lights up with a debuff **your** cleanse can remove; click it to cleanse that player
 - **Group buffs above each frame** — Mark of the Wild, Arcane Intellect, Power Word: Fortitude, Battle Shout, Skyfury and Blessing of the Bronze, whoever cast them
 - **Who's missing your buff** — your class's group buff (Druid, Mage, Priest, Warrior, Shaman, Evoker) shows on anyone who doesn't have it, out of combat, so you know who to rebuff
+- **Mana, rage, energy and every other resource** — a thin bar under each player's health in their resource's color, for whatever form they're in right now: a druid's bar switches between mana, energy and rage as they shift
 - **Role icons, raid markers, class colors**, "Dead" and "Offline"
 - **Out-of-range fading** and a white outline on your current target
 
@@ -107,6 +108,7 @@ A spell you haven't learned or talented simply does nothing when clicked; bind s
 ## Compatibility
 
 - **WoW 12.1.5** (Midnight Season 2)
+- **WoW Forever** supported too
 - Standalone — nothing else to install
 - **Default clicks use English spell names.** On other client languages, set your clicks once in the editor (typing or dragging a spell works in any language).
 - Works alongside other addons; turn off "Hide Blizzard party and raid frames" if you want to keep Blizzard's as well
