@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.1] — 2026-11-07
+
+- **Fixed: a /reload in the middle of a fight could break your party and raid frames' clicks.** The frames can't be set up in combat, so they now switch on when combat ends (it says so in chat).
+
 ## [1.1.0] — 2026-11-06
 
 ### Added

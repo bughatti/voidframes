@@ -316,5 +316,17 @@ f:SetScript("OnEvent", function(self, _, name)
     self:UnregisterEvent("ADDON_LOADED")
     VoidFramesDB = VoidFramesDB or {}
     BuildOptions()
-    if VF.Init then VF:Init() end
+    if not VF.Init then return end
+    -- The frames are secure unit buttons: their setup is blocked under combat lockdown, and
+    -- a /reload mid-fight loads us under it (2026-11-07). Then they're built when it ends.
+    if InCombatLockdown() then
+        print("|cff00c7ffVoidFrames|r: in combat: your frames switch on when combat ends.")
+        self:RegisterEvent("PLAYER_REGEN_ENABLED")
+        self:SetScript("OnEvent", function(me)
+            me:UnregisterEvent("PLAYER_REGEN_ENABLED")
+            VF:Init()
+        end)
+        return
+    end
+    VF:Init()
 end)
