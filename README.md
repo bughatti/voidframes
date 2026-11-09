@@ -1,5 +1,7 @@
 # VoidFrames
 
+**Works on:** WoW Midnight · WoW Forever
+
 **Clean party and raid frames with click casting built in, and your HoTs, debuffs and cleanses still visible in combat.**
 
 VoidFrames replaces Blizzard's party and raid frames with flat, readable boxes you can heal and cleanse straight from. Click a frame to cast on that player, with a spell on every mouse button and modifier, set per character and per spec. Your HoTs, their debuffs and their group buffs stay on the frames during fights, built on Blizzard's own aura display so they keep working under Midnight's combat rules.
@@ -45,7 +47,7 @@ VoidFrames replaces Blizzard's party and raid frames with flat, readable boxes y
 
 ## Getting Started
 
-1. Install with the CurseForge app, or copy the `VoidFrames` folder into `World of Warcraft/_retail_/Interface/AddOns/`.
+1. Install with the CurseForge app, or copy the `VoidFrames` folder into `World of Warcraft/_retail_/Interface/AddOns/` (WoW Forever: `_forever_/Interface/AddOns/`).
 2. Restart WoW or `/reload`.
 3. Join a group: your party frames appear on the left. Hold Alt and drag one to move them.
 4. Type `/vframes bind` (or Esc → Options → AddOns → VoidFrames → Edit click bindings) to see or change what each click does for your spec.
@@ -107,8 +109,8 @@ A spell you haven't learned or talented simply does nothing when clicked; bind s
 
 ## Compatibility
 
-- **WoW 12.1.5** (Midnight Season 2)
-- **WoW Forever** supported too
+- **WoW Midnight** 12.1.5 (Season 2)
+- **WoW Forever**
 - Standalone — nothing else to install
 - **Default clicks use English spell names.** On other client languages, set your clicks once in the editor (typing or dragging a spell works in any language).
 - Works alongside other addons; turn off "Hide Blizzard party and raid frames" if you want to keep Blizzard's as well
