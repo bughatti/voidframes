@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.2] — 2026-11-09
+
+- **Fixed: box borders missing a side.** Depending on where a window sat on screen, its left, right or bottom line could vanish. Borders are now exactly one screen pixel and can't round away.
+
 ## [1.1.1] — 2026-11-07
 
 - **Fixed: a /reload in the middle of a fight could break your party and raid frames' clicks.** The frames can't be set up in combat, so they now switch on when combat ends (it says so in chat).
