@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.3] — 2026-11-10
+
+### Fixed (WoW Forever)
+- **Click-cast defaults by class** with Classic spells you know (Penance or Word of Glory no longer bound there), and Classic dispels for the dispel highlight. Bindings you set yourself are never changed.
+
 ## [1.1.2] — 2026-11-09
 
 - **Fixed: box borders missing a side.** Depending on where a window sat on screen, its left, right or bottom line could vanish. Borders are now exactly one screen pixel and can't round away.

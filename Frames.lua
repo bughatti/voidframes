@@ -422,6 +422,9 @@ end
 -- Your class's group buff, shown when this player is MISSING it. Out of combat only:
 -- in combat the read is secret, and buffs rarely drop then anyway (death resets it).
 local GROUP_BUFF = { DRUID = 1126, MAGE = 1459, PRIEST = 21562, WARRIOR = 6673, SHAMAN = 462854, EVOKER = 364342 }
+-- WoW Forever's Classic Shaman has no Skyfury: don't check the party for it there.
+-- (Forever audit, 2026-11-10)
+if VF.IS_FOREVER then GROUP_BUFF.SHAMAN = nil end
 
 -- Follower NPCs carry their OWN copy of a group buff (same name, different spell ID:
 -- Captain Garrick showed Mark of the Wild on his target frame, but a lookup by 1126
@@ -612,9 +615,27 @@ local CLEANSES = {
     MAGE = { 475 },                 -- Remove Curse
 }
 
+-- WoW Forever has the Classic dispels (Purify Spirit, Cleanse Toxins, Nature's Cure ...
+-- don't exist there; the Shaman had no cleanse at all). Checked by name against what
+-- the character knows, first known wins. Retail keeps the ID table above.
+-- (Forever audit, 2026-11-10)
+local FOREVER_CLEANSES = {
+    PRIEST = { "Dispel Magic", "Abolish Disease", "Cure Disease" },
+    PALADIN = { "Cleanse", "Purify" },
+    SHAMAN = { "Cure Poison", "Cure Disease" },
+    DRUID = { "Remove Curse", "Abolish Poison", "Cure Poison" },
+    MAGE = { "Remove Lesser Curse" },
+}
+
 -- Localized name of the cleanse this character knows (for the spell attribute).
 function VF:CleanseSpell()
     local _, class = UnitClass("player")
+    if self.IS_FOREVER then   -- (Forever audit, 2026-11-10)
+        for _, nm in ipairs(FOREVER_CLEANSES[class] or {}) do
+            if self:KnowsSpellName(nm) then return nm end
+        end
+        return nil
+    end
     for _, id in ipairs(CLEANSES[class] or {}) do
         if C_SpellBook.IsSpellKnownOrInSpellBook(id) then
             local info = C_Spell.GetSpellInfo(id)
@@ -820,7 +841,15 @@ ev:SetScript("OnEvent", function(_, event, unit)
     elseif event == "SPELLS_CHANGED" then
         -- a cleanse learned / lost with a talent change: re-pick the cleanse button's spell
         local spell = VF:CleanseSpell()
-        if spell ~= VF._cleanseSpell then VF._cleanseSpell = spell; VF:ApplyBindings() end
+        -- Forever: a Classic spell learned at the trainer fills its default click binding
+        -- (GetBindings tops them up). (Forever audit, 2026-11-10)
+        local grew = false
+        if VF.IS_FOREVER then
+            VF._fvChanged = nil
+            VF:GetBindings()
+            grew = VF._fvChanged == true
+        end
+        if spell ~= VF._cleanseSpell or grew then VF._cleanseSpell = spell; VF:ApplyBindings() end
     else -- roster / login
         VF:HideBlizzard()
         -- raid grew or shrank past a size step: resize (queued to after combat if needed)

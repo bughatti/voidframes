@@ -146,8 +146,69 @@ VF.OLD_DEFAULTS = {
 --     defaults are swapped for the new ones.
 VF.DEFAULTS_VER = 5
 
+-- WoW Forever runs Classic classes on the modern client: the spec API is a placeholder
+-- (every character reports spec 1, so the retail healer sets above went to the wrong
+-- characters) and the spells are Classic ones. There the defaults go by class, Classic
+-- spells only, and only those the character knows (a list = first one known).
+-- Retail never reads any of this. (Forever audit, 2026-11-10)
+VF.IS_FOREVER = (select(4, GetBuildInfo()) or 0) < 100000
+VF.FOREVER_DEFAULTS = {
+    PRIEST  = { ["shift-1"] = { "Greater Heal", "Heal", "Lesser Heal" }, ["shift-2"] = "Flash Heal",
+                ["shift-3"] = "Renew", ["ctrl-2"] = "Power Word: Shield", ["ctrl-3"] = "Dispel Magic",
+                ["alt-1"] = { "Abolish Disease", "Cure Disease" } },
+    PALADIN = { ["shift-1"] = "Holy Light", ["shift-2"] = "Flash of Light", ["shift-3"] = "Blessing of Protection",
+                ["ctrl-2"] = { "Cleanse", "Purify" }, ["ctrl-3"] = "Lay on Hands", ["alt-1"] = "Blessing of Freedom" },
+    SHAMAN  = { ["shift-1"] = "Healing Wave", ["shift-2"] = "Lesser Healing Wave", ["shift-3"] = "Chain Heal",
+                ["ctrl-2"] = "Cure Poison", ["ctrl-3"] = "Cure Disease" },
+    DRUID   = { ["shift-1"] = "Healing Touch", ["shift-2"] = "Rejuvenation", ["shift-3"] = "Regrowth",
+                ["ctrl-2"] = "Remove Curse", ["ctrl-3"] = { "Abolish Poison", "Cure Poison" },
+                ["alt-1"] = "Rebirth", ["alt-2"] = "Innervate" },
+    MAGE    = { ["shift-1"] = "Remove Lesser Curse" },
+}
+
+-- Does this character know the spell with this (English) name? (Forever only)
+function VF:KnowsSpellName(name)
+    local info = C_Spell.GetSpellInfo(name)
+    local id = info and info.spellID
+    if not id then return false end
+    return (C_SpellBook.IsSpellKnownOrInSpellBook(id) or (IsPlayerSpell and IsPlayerSpell(id))) and true or false
+end
+
+-- Forever: targeting + the class's known Classic spells. Also returns, per key, the
+-- candidate list, so GetBindings can upgrade an untouched lower-rank pick later.
+function VF:ForeverDefaults()
+    local _, class = UnitClass("player")
+    local out, lists = With(TARGETING, {}), {}
+    for key, want in pairs(self.FOREVER_DEFAULTS[class] or {}) do
+        local names = type(want) == "table" and want or { want }
+        lists[key] = names
+        for _, nm in ipairs(names) do
+            if self:KnowsSpellName(nm) then out[key] = nm; break end
+        end
+    end
+    return out, lists
+end
+
+-- Forever role: the group role, else a tank stance / form / aura; nil when unknown.
+function VF:ForeverRole()
+    local r = UnitGroupRolesAssigned and UnitGroupRolesAssigned("player")
+    if r and r ~= "NONE" then return r end
+    local _, class = UnitClass("player")
+    if class == "WARRIOR" or class == "DRUID" then
+        local idx = GetShapeshiftForm and GetShapeshiftForm()
+        local sid = idx and idx > 0 and select(4, GetShapeshiftFormInfo(idx))
+        local nm = sid and C_Spell.GetSpellName(sid)
+        if nm == "Defensive Stance" or nm == "Bear Form" or nm == "Dire Bear Form" then return "TANK" end
+    elseif class == "PALADIN" and C_UnitAuras and C_UnitAuras.GetAuraDataBySpellName then
+        local ok, aura = pcall(C_UnitAuras.GetAuraDataBySpellName, "player", "Righteous Fury", "HELPFUL")
+        if ok and aura then return "TANK" end
+    end
+    return nil
+end
+
 -- The default set for the current spec.
 function VF:DefaultsForSpec()
+    if self.IS_FOREVER then return (self:ForeverDefaults()) end   -- (Forever audit, 2026-11-10)
     local getSpec = (C_SpecializationInfo and C_SpecializationInfo.GetSpecialization) or GetSpecialization
     local getInfo = (C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo) or GetSpecializationInfo
     local i = getSpec and getSpec()
@@ -159,6 +220,7 @@ end
 
 -- Role of the current spec ("TANK", "HEALER", "DAMAGER"), or nil.
 function VF:SpecRole()
+    if self.IS_FOREVER then return self:ForeverRole() end   -- spec role lies there (Forever audit, 2026-11-10)
     local getSpec = (C_SpecializationInfo and C_SpecializationInfo.GetSpecialization) or GetSpecialization
     local getInfo = (C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo) or GetSpecializationInfo
     local i = getSpec and getSpec()
@@ -227,7 +289,49 @@ function VF:GetBindings()
         b._ver = self.DEFAULTS_VER
         char[spec] = b
     end
+    if self.IS_FOREVER and self:ForeverTopUp(b) then self._fvChanged = true end   -- (Forever audit, 2026-11-10)
     return b
+end
+
+-- Forever only (Forever audit, 2026-11-10):
+-- 1) once per binding set: drop untouched RETAIL defaults this character can't cast
+--    (sets made before this fix got Penance / Word of Glory / Healing Surge ...). Only
+--    spell names from the retail tables that aren't known; target / menu / focus stay.
+-- 2) every call: fill keys that are empty (and not cleared by you) with Classic spells
+--    learned since, and move an untouched pick up its list (Lesser Heal -> Heal).
+-- Returns true when something changed.
+function VF:ForeverTopUp(b)
+    local changed = false
+    if b._fv ~= 1 then
+        local _, class = UnitClass("player")
+        local retail = {}
+        for _, set in pairs(self.SPEC_DEFAULTS) do
+            for _, v in pairs(set) do retail[v] = true end
+        end
+        for _, v in pairs(self.CLASS_DEFAULTS[class] or {}) do retail[v] = true end
+        for k, v in pairs(b) do
+            if type(k) == "string" and k:sub(1, 1) ~= "_" and type(v) == "string" and retail[v]
+                and not self.ACTIONS[v:lower()] and not self:KnowsSpellName(v) then
+                b[k] = nil; changed = true
+            end
+        end
+        b._fv = 1
+    end
+    local src, lists = self:ForeverDefaults()
+    local cleared = b._cleared or {}
+    for k, v in pairs(src) do
+        if b[k] == nil then
+            if not cleared[k] then b[k] = v; changed = true end
+        elseif b[k] ~= v and lists[k] then
+            local cur, new
+            for i, nm in ipairs(lists[k]) do
+                if nm == b[k] then cur = i end
+                if nm == v then new = i end
+            end
+            if cur and new and new < cur then b[k] = v; changed = true end
+        end
+    end
+    return changed
 end
 
 function VF:SetBinding(key, value)
