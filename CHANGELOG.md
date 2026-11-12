@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.4] — 2026-11-12
+
+- **The key bindings editor can be dragged and stays where you put it**, even after a restart.
+
 ## [1.1.3] — 2026-11-10
 
 ### Fixed (WoW Forever)

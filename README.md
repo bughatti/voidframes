@@ -1,4 +1,4 @@
-# VoidFrames
+# VoidFrames - Party & Raid Frames with Click Casting
 
 **Works on:** WoW Midnight · WoW Forever
 
@@ -117,4 +117,4 @@ A spell you haven't learned or talented simply does nothing when clicked; bind s
 
 ---
 
-*Part of the Void addon family by Vede · MIT licensed · [Source & bug reports](https://github.com/bughatti/voidframes) · [All Void addons](https://www.curseforge.com/members/bughatti/projects) · free M+ & raid player lookups at [voidscout.io](https://voidscout.io) · more at [tinkerline.io](https://tinkerline.io) · [Discord](https://discord.gg/7ZHmx7zMDh)*
+*Part of the Void addon family by Vede · MIT licensed · [Source & bug reports](https://github.com/bughatti/voidframes) · [All Void addons](https://www.curseforge.com/members/bughatti/projects) · free M+ & raid player lookups at [voidscout.io](https://voidscout.io) · more at [tinkerline.io](https://tinkerline.io/addons/voidframes/) · [Discord](https://discord.gg/7ZHmx7zMDh)*
